@@ -1,17 +1,16 @@
 # Data section
-.section .data
-# Place here your program data.
-# In this example, two vector of floats
-# a vector of ints and a single int are defined
-V1: .float 1.0, 2.0, 3.0, 4.0
-V2: .float 5.0, 6.0, 7.0, 8.0
-V3: .float 0.9, 0.10, 0.11, .012
+#.section .data
+.data
+V1: .float 4.6,1.1,1.3,7.1,2,4.7,7.4,1.9,7.5,8.1,7.3,3.9,3.9,3.9,5.5,8.1,8.5,8.1,5.5,9,2.1,5,1.2,9.4,8.6,2,6.8,5.7,8.8,1.7,4.6,6.4
+V2: .float 2.4,3.3,6.4,9.1,9.1,8.5,5.5,5.1,3.2,5.5,4.6,4.7,9.6,2.3,1.6,1,8.1,5.7,3.2,2.1,8.6,2.7,5.2,2.2,6.7,2.3,3.2,2.2,8.5,6.1,7.4,4.5
+V3: .float 2.5,6.3,8.6,1.4,9.1,4.5,3.8,9.7,3.5,7.8,9.9,7.5,5.2,9.6,4.6,5.1,4,9.5,8.4,1.1,3.6,7.7,8.2,7.3,4.2,2.1,7.2,2,7.5,1.2,5.7,3
 V4: .space 128
 V5: .space 128
 V6: .space 128
 
 # Code section
-.section .text
+#.section .text
+.text
 .globl _start 
 _start:
           la      x1, V1            # load V1 address in x1
@@ -26,6 +25,7 @@ _start:
           la      x6, V6            # load V6 address in x6
 
           addi    x7, x0, 31        # i = 31
+          slli 	  x9, x7, 2
 Main:
           blt     x7, x0 End        # if i < 0 jump to End 
           flw     f1, 0(x1)         # f1 = V1[i]
@@ -34,20 +34,22 @@ Main:
 
           fmul.s  f7, f1, f1        # f7 = V1[i] * V1[i]
           fsub.s  f7, f7, f2        # f7 = V1[i] * V1[i] - V2[i]
-          add     x8, x7, x4
+          add     x8, x9, x4
           fsw     f7, 0(x8)         # V4[i] = V1[i] * V1[i] - V2[i]
 
           fdiv.s  f8, f7, f3        # f8 = V4[i]/V3[i]
           fsub.s  f8, f7, f2        # f8 = V4[i]/V3[i] - V2[i]
-          add     x8, x7, x5
+          add     x8, x9, x5
           fsw     f8, 0(x8)         # V5[i] = V4[i]/V3[i] - V2[i]
 
           fsub.s  f9, f7, f1        # f9 = V4[i] - V1[i]
           fmul.s  f9, f9, f8        # f9 = (V4[i] - V1[i]) * V5[i]
-          add     x8, x7, x6
+          add     x8, x9, x6
           fsw     f9, 0(x8)         # V6[i] = (V4[i] - V1[i]) * V5[i]
 
-          addi    x7, x7, -1        # i--
+          addi    x7, x7, -1
+          slli	  x9, x7, 2	
+                  # i--
           j       Main
 End:
 li a0, 0
