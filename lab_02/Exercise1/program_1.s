@@ -35,7 +35,7 @@ Main:
           fsw     f7, 0(x8)         # V4[i] = V1[i] * V1[i] - V2[i]
 
           fdiv.s  f8, f7, f3        # f8 = V4[i]/V3[i]
-          fsub.s  f8, f7, f2        # f8 = V4[i]/V3[i] - V2[i]
+          fsub.s  f8, f8, f2        # f8 = V4[i]/V3[i] - V2[i]
           add     x8, x9, x5
           fsw     f8, 0(x8)         # V5[i] = V4[i]/V3[i] - V2[i]
 
