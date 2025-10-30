@@ -1,4 +1,3 @@
-
 #.section .data
 .data
 w: .float 4.6,1.1,1.3,7.1,2,4.7,7.4,1.9,7.5,8.1,7.3,3.9,3.9,3.9,5.5,8.1
@@ -34,16 +33,15 @@ _start:
 
           fmv.w.x   f5, x0
 Main:
-          beq       x6, x5, EndLoop       # if j == x5 jump to End 
+          beq       x6, x5, EndLoop   # if j == x5 jump to End 
 
           add       x12, x1, x7
-          flw       f1, 0(x12)         # load w[j] in f1
+          flw       f1, 0(x12)        # load w[j] in f1
           add       x12, x2, x7
-          flw       f2, 0(x12)         # load i[j] in f2
+          flw       f2, 0(x12)        # load i[j] in f2
 
           fmul.s    f4, f1, f2        # f3 = w[j] * i[j]
           fadd.s    f4, f4, f3
-          fadd.s    f5, f5, f4        # f5 = f3 + b
 
           addi      x6, x6, 1
           slli      x7, x6, 2         # iteratore per vettore float
@@ -51,14 +49,15 @@ Main:
           j         Main
 EndLoop:
 
-          fmv.x.w   x10, f5
+          fadd.s    f4, f3, f4        # f4 = f4 + b
+          fmv.x.w   x10, f4
           and       x10, x10, x9
           beq       x10, x9, EspUno
-          fsw       f5, 0(x11)
+          fsw       f4, 0(x11)
           j         End
 EspUno:
-          fmv.w.x   f5, x0
-          fsw       f5, 0(x11)
+          fmv.w.x   f4, x0
+          fsw       f4, 0(x11)
 End:
           li a0, 0
           li a7, 93
