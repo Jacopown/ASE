@@ -43,31 +43,14 @@ Main:
           addi      x6, x6, 1
           slli      x7, x6, 2         # iteratore per vettore float
 
-          add       x12, x1, x7
-          flw       f9, 0(x12)        # load w[j] in f1
-          add       x12, x2, x7
-          flw       f10, 0(x12)        # load i[j] in f2
-          addi      x6, x6, 1
-          slli      x7, x6, 2         # iteratore per vettore float
 
           fmul.s    f4, f1, f2        # f3 = w[j] * i[j]
           fmul.s    f8, f6, f7        # f3 = w[j] * i[j]
-          fmul.s    f11, f9, f10        # f3 = w[j] * i[j]
           fadd.s    f5, f4, f5
           fadd.s    f5, f8, f5
-          fadd.s    f5, f11, f5
 
           j         Main
 EndLoop:
-          add       x12, x1, x7
-          flw       f1, 0(x12)        # load w[j] in f1
-          add       x12, x2, x7
-          flw       f2, 0(x12)        # load i[j] in f2
-          addi      x6, x6, 1
-          fmul.s    f4, f1, f2        # f3 = w[j] * i[j]
-          slli      x7, x6, 2         # iteratore per vettore float
-          fadd.s    f5, f4, f5
-
           fadd.s    f4, f3, f4        # f4 = f4 + b
           fmv.x.w   x10, f4
           fsw       f4, 0(x11)
