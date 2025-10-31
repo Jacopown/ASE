@@ -51,15 +51,49 @@ Main:
           flw       f13, 0(x12)        # load i[j] in f2
           addi      x6, x6, 1
           slli      x7, x6, 2         # iteratore per vettore float
+
+
+          add       x12, x1, x7
+          flw       f15, 0(x12)        # load w[j] in f1
+          add       x12, x2, x7
+          flw       f16, 0(x12)        # load i[j] in f2
+          addi      x6, x6, 1
+          slli      x7, x6, 2         # iteratore per vettore float
+          add       x12, x1, x7
+          flw       f18, 0(x12)        # load w[j] in f1
+          add       x12, x2, x7
+          flw       f19, 0(x12)        # load i[j] in f2
+          addi      x6, x6, 1
+          slli      x7, x6, 2         # iteratore per vettore float
+          add       x12, x1, x7
+          flw       f21, 0(x12)        # load w[j] in f1
+          add       x12, x2, x7
+          flw       f22, 0(x12)        # load i[j] in f2
+          addi      x6, x6, 1
+          slli      x7, x6, 2         # iteratore per vettore float
+          add       x12, x1, x7
+          flw       f24, 0(x12)        # load w[j] in f1
+          add       x12, x2, x7
+          flw       f25, 0(x12)        # load i[j] in f2
+          addi      x6, x6, 1
+          slli      x7, x6, 2         # iteratore per vettore float
           
           fmul.s    f4, f1, f2        # f3 = w[j] * i[j]
           fmul.s    f8, f6, f7        # f3 = w[j] * i[j]
           fmul.s    f11, f10, f9        # f3 = w[j] * i[j]
           fmul.s    f14, f12, f13        # f3 = w[j] * i[j]
+          fmul.s    f17, f15, f16        # f3 = w[j] * i[j]
+          fmul.s    f20, f18, f19        # f3 = w[j] * i[j]
+          fmul.s    f23, f21, f22        # f3 = w[j] * i[j]
+          fmul.s    f26, f24, f25        # f3 = w[j] * i[j]
           fadd.s    f5, f4, f5
           fadd.s    f5, f8, f5
           fadd.s    f5, f11, f5
           fadd.s    f5, f14, f5
+          fadd.s    f5, f17, f5
+          fadd.s    f5, f20, f5
+          fadd.s    f5, f23, f5
+          fadd.s    f5, f26, f5
 
           j         Main
 EndLoop:

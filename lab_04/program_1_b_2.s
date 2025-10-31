@@ -4,7 +4,7 @@ i: .float 2.4,3.3,6.4,9.1,9.1,8.5,5.5,5.1,3.2,5.5,4.6,4.7,9.6,2.3,1.6,1
 y: .float
 b: .byte 0xab
 mask: .word 0x7F800000
-k: .byte 15
+k: .byte 16
 
           .section .text
           .globl _start 
@@ -25,8 +25,6 @@ _start:
           fcvt.s.w  f3, x4            # f3 = b float cast 
           fmv.w.x   f5, x0
 Main:
-
-
           beq       x6, x5, EndLoop   # if j == x5 jump to End 
 
           add       x12, x1, x7
