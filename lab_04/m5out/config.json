@@ -1215,7 +1215,7 @@
                         "name": "workload",
                         "path": "system.cpu.workload",
                         "cmd": [
-                            "program_1_a"
+                            "program_1_b_16"
                         ],
                         "cwd": "/home/vboxuser/ASE/lab_04",
                         "drivers": [],
@@ -1224,7 +1224,7 @@
                         "errout": "cerr",
                         "euid": 100,
                         "eventq_index": 0,
-                        "executable": "program_1_a",
+                        "executable": "program_1_b_16",
                         "gid": 1000,
                         "input": "cin",
                         "kvmInSE": false,
