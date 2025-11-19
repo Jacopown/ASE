@@ -1,0 +1,21 @@
+[default_config]
+version = "0.10.1"
+assembler = "gas"
+instruction_set = "arm"
+
+[default_config.opts]
+compiler = "arm-none-eabi-gcc"
+compile_flags_txt = [
+    "-mcpu=cortex-m3",
+    "-mthumb",
+    "-mfloat-abi=soft",
+    "-O3",
+    "-g",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Wall",
+    "-Wextra",
+    "-std=c11"
+]
+diagnostics = true
+default_diagnostics = false
