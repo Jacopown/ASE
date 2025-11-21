@@ -145,9 +145,6 @@ Reset_Handler   PROC
 				ldr   num_cards,      =NUM_CARDS
 				ldrb  num_cards,      [num_cards]
         ldr   support,        SUPPORT
-				; ldr poor, =POOR
-				; ldr good, =GOOD
-				; ldr mint, =MINT
 				
 				ADD num_cards, #-1
 				EOR r6, r6
@@ -163,6 +160,7 @@ purchase_loop
 				BNE purchase_loop
 				ADD r7, #-1
 				ldr r9, [purchase_price, r7, LSL #2]
+
 				EOR r7, r7
 current_loop
 				ldr r8, [current_price, r7, LSL #2]
@@ -171,23 +169,45 @@ current_loop
 				BNE current_loop
 				ADD r7, #-1
 				ldr r12, [current_price, r7, LSL #2]
-current_loop
-				ldr r8, [current_price, r7, LSL #2]
-				ADD r7, #2
-				CMP r8, r5
-				BNE current_loop
-				ADD r7, #-1
-				ldr r12, [current_price, r7, LSL #2]
-
 				SUB r7, r12, r9
         STR r7, [supporto, r6, LSL #4]
-        STR r7, [supporto, r6, LSL #6]
+
+				EOR r7, r7
+condition_loop
+				ldr r8, [condition, r7, LSL #2]
+				ADD r7, #2
+				CMP r8, r5
+				BNE condition_loop
+				ADD r7, #-1
+				ldr r12, [condition, r7, LSL #2]
+        STR r12, [supporto, r6, LSL #6]
+
 				ADD r6, #1
 				CMP r6, num_cards
 				BGT loop_end
 				B main_loop
-				
 loop_end					
+                        ; 0 cards
+                        ; 5 supporto
+				ldr poor, =POOR ; 6
+				ldr good, =GOOD ; 7
+				ldr mint, =MINT ; 8
+
+        
+				ADD num_cards, #-1
+				EOR r6, r6
+main_loop
+
+				ldr r4, [cards, r6, LSL #2]
+
+        ldr r1, [supporto, r4, lsl #6]
+        ldr r2, [supporto, r4, lsl #8]
+        ldr r3, [supporto, r4, lsl #10]
+
+        ldr r10, [supporto, r9, lsl #6]
+        ldr r11, [supporto, r9, lsl #8]
+        ldr r12, [supporto, r9, lsl #10]
+
 				orr r0,r0,#1
 				mov r1, r2	
 				
