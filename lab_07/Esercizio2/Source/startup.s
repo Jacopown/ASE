@@ -118,20 +118,23 @@ CRP_Key         DCD     0xFFFFFFFF
 
 
                 AREA    arrays, DATA, READWRITE
-POOR	    SPACE 7*4
-GOOD	    SPACE 7*4
-MINT	    SPACE 7*4
+POOR_SUP	    SPACE 7*4*2
+GOOD_SUP	    SPACE 7*4*2
+MINT_SUP	    SPACE 7*4*2
+POOR	    	SPACE 7*4
+GOOD	    	SPACE 7*4
+MINT	    	SPACE 7*4
 
                 AREA    |.text|, CODE, READONLY
 					
-cards				    rn 		0
-condition			  rn 		1
-purchase_price	rn 		2
+cards				rn 		0
+condition			rn 		1
+purchase_price		rn 		2
 current_price		rn 		3
-num_cards			  rn 		4
-poor				    rn		5
-good				    rn		6
-mint				    rn		7
+num_cards			rn 		4
+poor				rn		5
+good				rn		6
+mint				rn		7
 
 Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK] 
@@ -140,17 +143,18 @@ Reset_Handler   PROC
 				ldr   condition,      =CONDITION  ; 1
 				ldr   num_cards,      =NUM_CARDS
 				ldrb  num_cards,      [num_cards] ; 4
-				ldr poor, =POOR                   ; 5
-				ldr good, =GOOD                   ; 6
-				ldr mint, =MINT                   ; 7
+
+				eor r2, r2
+				eor r9, r9
+				eor r10, r10
 				
 				ADD num_cards, #-1
 				EOR r12, r12
 main_loop
 				ldr r11, [cards, r12, LSL #2]
-        PUSH{r3, r11}
-        BL  id_dif
-        POP{r3, r11} ; diff, id
+				PUSH{r3, r11}
+				BL  dif
+				POP{r3, r11} ; diff, id
         
 				EOR r7, r7
 condition_loop
@@ -158,26 +162,60 @@ condition_loop
 				ADD r7, r7, #2
 				CMP r8, r11
 				BNE condition_loop
-        SUB r7, r7, #1
+				SUB r7, r7, #1
 				ldr r8, [condition, r7, LSL #2]
-        cmp r8, #0
-        streq r11, [poor, r8, LSL #2]
-        addeq r8, r8, #1
-        streq r3, [poor, r8, LSL #2]
-        beq vec_set
-        cmp r8, #1
-        streq r11, [good, r8, LSL #2]
-        addeq r8, r8, #1
-        streq r3, [good, r8, LSL #2]
-        beq vec_set
-        cmp r8, #2
-        streq r11, [mint, r8, LSL #2]
-        addeq r8, r8, #1
-        streq r3, [mint, r8, LSL #2]
+				
+				ldr poor, =POOR_SUP                   
+				ldr good, =GOOD_SUP                   
+				ldr mint, =MINT_SUP                   
+				
+				cmp r8, #0
+				streq r11, [poor, r2, LSL #2]
+				addeq r2, r2, #1
+				streq r3, [poor, r2, LSL #2]
+				addeq r2, r2, #1
+				beq vec_set
+				
+				cmp r8, #1
+				streq r11, [good, r9, LSL #2]
+				addeq r9, r9, #1
+				streq r3, [good, r9, LSL #2]
+				addeq r9, r9, #1
+				beq vec_set
+				
+				cmp r8, #2
+				streq r11, [mint, r10, LSL #2]
+				addeq r10, r10, #1
+				streq r3, [mint, r10, LSL #2]
+				addeq r10, r10, #1
 vec_set
 				ADD r12, #1
 				CMP r12, num_cards
 				BLE main_loop
+				
+				; poor r5
+				; good r6
+				; mint r7
+				LSR r2, r2, #3
+				SUB r2, r2, #1
+				PUSH{r2, r5}
+				BL InsertionSort
+				POP{r2, r5}
+				
+				LSR r9, r9, #3
+				SUB r9, r9, #1
+				PUSH{r9, r6}
+				BL InsertionSort
+				POP{r9, r6}
+				
+				LSR r10, r10, #3
+				SUB r10, r10, #1
+				PUSH{r10, r7}
+				BL InsertionSort
+				POP{r10, r7}
+				
+				
+				
 
 				orr r0,r0,#1
 				mov r1, r2	
@@ -186,7 +224,7 @@ vec_set
 				
 stop            BX      R0
 				ENDP
-
+; ----------------------------------------------------------------------	
 dif  PROC
 ; purchase_price	rn 		2
 ; current_price		rn 		3
@@ -215,9 +253,49 @@ current_loop
 				SUB r12, r12, r9
         str r12, [sp, #32]
         
-        POP{purchase_price, current_price, r7, r8, r9, r10, r12, lr}
+        POP{purchase_price, current_price, r7, r8, r9, r10, r12, pc}
         ENDP
-					
+; ----------------------------------------------------------------------	
+InsertionSort	PROC
+
+				PUSH    {R0-R8, LR}   
+				LDR     R5, [SP, #44]
+				LDR     R4, [SP, #40]
+				LSL     R4, R4, #3
+				MOV     R0, #8
+
+OuterLoop_Proc
+				CMP     R0, R4
+				BGT     EndSort_Proc
+				LDR     R2, [R5, R0]  
+				ADD     R8, R5, R0
+				LDR     R3, [R8, #4]
+				SUB     R1, R0, #8     
+
+InnerLoop_Proc
+				CMP     R1, #0
+				BLT     InsertKey_Proc 
+				ADD     R8, R5, R1				
+				LDR     R6, [R8, #4]
+				CMP     R6, R3
+				BLE     InsertKey_Proc  
+				LDR     R7, [R5, R1]    
+				STR     R7, [R8, #8]
+				STR     R6, [R8, #12]
+				SUB     R1, R1, #8    
+				B       InnerLoop_Proc
+
+InsertKey_Proc
+				ADD     R12, R5, R1     ; Ricalcola indirizzo base j (R5 + R1)
+				STR     R2, [R8, #8]   ; Scrivi Key.ID in posizione corretta
+				STR     R3, [R8, #12]
+				ADD     R0, R0, #8    
+				B       OuterLoop_Proc
+
+EndSort_Proc
+				POP     {R0-R8, PC}
+				ENDP
+; ----------------------------------------------------------------------	
 
 				ALIGN
 				LTORG
