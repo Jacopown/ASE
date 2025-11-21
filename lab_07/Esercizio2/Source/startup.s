@@ -117,84 +117,105 @@ CRP_Key         DCD     0xFFFFFFFF
                 ENDIF
 
 
-                AREA    arrays, CODE, READWRITE
+                AREA    arrays, DATA, READWRITE
 POOR	    SPACE 7*4
 GOOD	    SPACE 7*4
 MINT	    SPACE 7*4
-SUPPORTO	SPACE 7*3*4
 
                 AREA    |.text|, CODE, READONLY
 					
-cards				    RN 		0
-condition			  RN 		1
-purchase_price	RN 		2
-current_price		RN 		3
-num_cards			  RN 		4
-support         RN    5
-poor				    RN		6
-good				    RN		7
-mint				    RN		8
+cards				    rn 		0
+condition			  rn 		1
+purchase_price	rn 		2
+current_price		rn 		3
+num_cards			  rn 		4
+poor				    rn		5
+good				    rn		6
+mint				    rn		7
 
 Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK] 
                 
-				ldr   cards,          =CARDS
-				ldr   condition,      =CONDITION
-				ldr   purchase_price, =PURCHASE_PRICE
-				ldr   current_price,  =CURRENT_PRICE
+				ldr   cards,          =CARDS      ; 0
+				ldr   condition,      =CONDITION  ; 1
 				ldr   num_cards,      =NUM_CARDS
-				ldrb  num_cards,      [num_cards]
-        ldr   support,        SUPPORT
-				; ldr poor, =POOR
-				; ldr good, =GOOD
-				; ldr mint, =MINT
+				ldrb  num_cards,      [num_cards] ; 4
+				ldr poor, =POOR                   ; 5
+				ldr good, =GOOD                   ; 6
+				ldr mint, =MINT                   ; 7
 				
 				ADD num_cards, #-1
 				EOR r6, r6
 main_loop
-				ldr r5, [cards, r6, LSL #2]
-        STR r5, [supporto, r6, LSL #2]
+				ldr r10, [cards, r6, LSL #2]
+				ADD R6, R6, R6, LSL #1
 
+        PUSH{r2, r3, r6, r10}
+        BL  id_dif
+        POP{r2, r3, r6, r10}
+				ADD r6, r6, #1
+        
 				EOR r7, r7
-purchase_loop
-				ldr r8, [purchase_price, r7, LSL #2]
+condition_loop
+				ldr r8, [condition, r7, LSL #2]
 				ADD r7, #2
-				CMP r8, r5
-				BNE purchase_loop
+				CMP r8, r10
+				BNE condition_loop
 				ADD r7, #-1
-				ldr r9, [purchase_price, r7, LSL #2]
-				EOR r7, r7
-current_loop
-				ldr r8, [current_price, r7, LSL #2]
-				ADD r7, #2
-				CMP r8, r5
-				BNE current_loop
-				ADD r7, #-1
-				ldr r12, [current_price, r7, LSL #2]
-current_loop
-				ldr r8, [current_price, r7, LSL #2]
-				ADD r7, #2
-				CMP r8, r5
-				BNE current_loop
-				ADD r7, #-1
-				ldr r12, [current_price, r7, LSL #2]
-
-				SUB r7, r12, r9
-        STR r7, [supporto, r6, LSL #4]
-        STR r7, [supporto, r6, LSL #6]
+				ldr r12, [condition, r7, LSL #2]	
+				ADD r6, r6, #1
+				STR r12, [support, r6]
+				SUB r6, r6, #2
+				MOV r7, #3
+				SDIV r6, r6, r7
+				
 				ADD r6, #1
 				CMP r6, num_cards
 				BGT loop_end
-				B main_loop
+				B main_loop				
+loop_end			
 				
-loop_end					
+				BL	sort
+				
 				orr r0,r0,#1
 				mov r1, r2	
 				
 				LDR     R0, =stop
 				
 stop            BX      R0
-                ENDP
+				ENDP
+
+id_dif  PROC
+; purchase_price	rn 		2
+; current_price		rn 		3
+        PUSH{purchase_price, current_price, r7, r8, r9, r10, r12, lr}
+				ldr   purchase_price, =PURCHASE_PRICE
+				ldr   current_price,  =CURRENT_PRICE
+        ldr   r6, [sp, #44]
+        ldr   r10, [sp, #48]
+
+				EOR r7, r7
+purchase_loop
+				ldr r8, [purchase_price, r7, LSL #2]
+				ADD r7, #2
+				CMP r8, r10
+				BNE purchase_loop
+				ADD r7, #-1
+				ldr r9, [purchase_price, r7, LSL #2]
+
+				EOR r7, r7
+current_loop
+				ldr r8, [current_price, r7, LSL #2]
+				ADD r7, #2
+				CMP r8, r10
+				BNE current_loop
+				ADD r7, #-1
+				ldr r12, [current_price, r7, LSL #2]
+				SUB r12, r12, r9
+        
+        POP{purchase_price, current_price, r7, r8, r9, r10, r12, lr}
+        ENDP
+					
 
 				ALIGN
 				LTORG
