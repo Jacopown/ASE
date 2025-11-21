@@ -145,38 +145,40 @@ Reset_Handler   PROC
 				ldr mint, =MINT                   ; 7
 				
 				ADD num_cards, #-1
-				EOR r6, r6
+				EOR r12, r12
 main_loop
-				ldr r10, [cards, r6, LSL #2]
-				ADD R6, R6, R6, LSL #1
-
-        PUSH{r2, r3, r6, r10}
+				ldr r11, [cards, r12, LSL #2]
+        PUSH{r3, r11}
         BL  id_dif
-        POP{r2, r3, r6, r10}
-				ADD r6, r6, #1
+        POP{r3, r11} ; diff, id
         
 				EOR r7, r7
 condition_loop
 				ldr r8, [condition, r7, LSL #2]
-				ADD r7, #2
-				CMP r8, r10
+				ADD r7, r7, #2
+				CMP r8, r11
 				BNE condition_loop
-				ADD r7, #-1
-				ldr r12, [condition, r7, LSL #2]	
-				ADD r6, r6, #1
-				STR r12, [support, r6]
-				SUB r6, r6, #2
-				MOV r7, #3
-				SDIV r6, r6, r7
-				
-				ADD r6, #1
-				CMP r6, num_cards
-				BGT loop_end
-				B main_loop				
-loop_end			
-				
-				BL	sort
-				
+        SUB r7, r7, #1
+				ldr r8, [condition, r7, LSL #2]
+        cmp r8, #0
+        streq r11, [poor, r8, LSL #2]
+        addeq r8, r8, #1
+        streq r3, [poor, r8, LSL #2]
+        beq vec_set
+        cmp r8, #1
+        streq r11, [good, r8, LSL #2]
+        addeq r8, r8, #1
+        streq r3, [good, r8, LSL #2]
+        beq vec_set
+        cmp r8, #2
+        streq r11, [mint, r8, LSL #2]
+        addeq r8, r8, #1
+        streq r3, [mint, r8, LSL #2]
+vec_set
+				ADD r12, #1
+				CMP r12, num_cards
+				BLE main_loop
+
 				orr r0,r0,#1
 				mov r1, r2	
 				
@@ -185,14 +187,13 @@ loop_end
 stop            BX      R0
 				ENDP
 
-id_dif  PROC
+dif  PROC
 ; purchase_price	rn 		2
 ; current_price		rn 		3
         PUSH{purchase_price, current_price, r7, r8, r9, r10, r12, lr}
 				ldr   purchase_price, =PURCHASE_PRICE
 				ldr   current_price,  =CURRENT_PRICE
-        ldr   r6, [sp, #44]
-        ldr   r10, [sp, #48]
+        ldr   r10, [sp, #36] ; id
 
 				EOR r7, r7
 purchase_loop
@@ -212,6 +213,7 @@ current_loop
 				ADD r7, #-1
 				ldr r12, [current_price, r7, LSL #2]
 				SUB r12, r12, r9
+        str r12, [sp, #32]
         
         POP{purchase_price, current_price, r7, r8, r9, r10, r12, lr}
         ENDP
